@@ -1,69 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingCart, Search, X, Info, Truck, ShieldCheck, Package, ChevronRight, Tag } from 'lucide-react';
 
-// --- Datos Simulados (Mock Data) ---
-const productsData = [
-    {
-        id: 1,
-        name: "Generador Industrial CAT 500kVA",
-        category: "Maquinaria Pesada",
-        price: 45000.00,
-        originalPrice: 68000.00,
-        image: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80",
-        description: "Unidad excedente de licitación hospitalaria. Nuevo, 0 horas de uso. Capacidad industrial.",
-        badge: "Oportunidad Única"
-    },
-    {
-        id: 2,
-        name: "Lote de Balones de Fútbol Pro FIFA",
-        category: "Deportes y Recreación",
-        price: 25.50,
-        originalPrice: 85.00,
-        image: "https://images.unsplash.com/photo-1614632537423-1e6c2e7e0aab?auto=format&fit=crop&w=800&q=80",
-        description: "Balones de alta competencia. Excedente de programa municipal de deportes.",
-        badge: "Liquidación"
-    },
-    {
-        id: 3,
-        name: "Servidor Rack Dell PowerEdge R740",
-        category: "Tecnología",
-        price: 3200.00,
-        originalPrice: 5500.00,
-        image: "https://images.unsplash.com/photo-1558494949-efc535b5c47d?auto=format&fit=crop&w=800&q=80",
-        description: "Servidor empresarial de alto rendimiento. Caja abierta, garantía intacta.",
-        badge: "Tecnología"
-    },
-    {
-        id: 4,
-        name: "Retroexcavadora John Deere 310L",
-        category: "Maquinaria Pesada",
-        price: 82000.00,
-        originalPrice: 115000.00,
-        image: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=800&q=80",
-        description: "Modelo 2024. No recepcionada por cambio de administración local. Documentación al día.",
-        badge: "Alto Valor"
-    },
-    {
-        id: 5,
-        name: "Set de Escritorios Modulares (Pack x10)",
-        category: "Mobiliario",
-        price: 1500.00,
-        originalPrice: 3000.00,
-        image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80",
-        description: "Estaciones de trabajo ergonómicas. Color haya/negro. Ideal para oficinas nuevas.",
-        badge: "Pack Mayorista"
-    },
-    {
-        id: 6,
-        name: "Kit de Primeros Auxilios Táctico",
-        category: "Insumos",
-        price: 45.00,
-        originalPrice: 120.00,
-        image: "https://images.unsplash.com/photo-1603398938378-e54eab446dde?auto=format&fit=crop&w=800&q=80",
-        description: "Kits completos nivel 3. Excedente de dotación de seguridad ciudadana.",
-        badge: "Stock Limitado"
-    }
-];
+// --- Datos cargados desde Supabase ---
+import { getProducts } from './services/api';
+
 
 const categories = ["Todos", "Maquinaria Pesada", "Tecnología", "Mobiliario", "Deportes y Recreación", "Insumos"];
 
@@ -106,17 +46,17 @@ const Navbar = ({ cartCount, toggleCart }) => {
                 </div>
 
                 <div className="hidden md:flex items-center gap-8 text-slate-300 text-sm font-medium">
-                    <button className="hover:text-white transition-colors">Catálogo</button>
-                    <button className="hover:text-white transition-colors">Cómo Comprar</button>
-                    <button className="hover:text-white transition-colors">Garantías</button>
-                    <button className="hover:text-white transition-colors">Contacto</button>
+                    <a href="#catalogo" className="hover:text-white transition-colors">Catálogo</a>
+                    <a href="#categorias" className="hover:text-white transition-colors">Categorías</a>
+                    <a href="#nosotros" className="hover:text-white transition-colors">Quiénes Somos</a>
+                    <a href="#contacto" className="hover:text-white transition-colors">Contacto</a>
                 </div>
 
                 <div className="flex items-center gap-4">
                     <button className="text-white hover:text-amber-400 transition-colors">
                         <Search size={20} />
                     </button>
-                    <button 
+                    <button
                         onClick={toggleCart}
                         className="relative bg-white/10 hover:bg-white/20 text-white p-2 rounded-full transition-all"
                     >
@@ -142,7 +82,7 @@ const Hero = () => (
                     <ShieldCheck size={14} /> Inventario Certificado
                 </div>
                 <h2 className="text-5xl lg:text-7xl font-extrabold text-white mb-6 leading-tight">
-                    Activos Corporativos.<br/>
+                    Activos Corporativos.<br />
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">
                         Precios de Liquidación.
                     </span>
@@ -160,7 +100,7 @@ const Hero = () => (
                 </div>
             </div>
         </div>
-        
+
         {/* Decorative stats */}
         <div className="hidden lg:flex absolute right-0 bottom-12 gap-12 pr-12 border-l border-slate-800 pl-12">
             <div>
@@ -175,59 +115,86 @@ const Hero = () => (
     </header>
 );
 
-const ProductCard = ({ product, addToCart }) => (
-    <div className="group bg-white rounded-xl overflow-hidden border border-slate-200 hover:border-amber-400/50 hover:shadow-xl transition-all duration-300 flex flex-col h-full">
-        <div className="relative h-64 overflow-hidden bg-slate-100">
-            <img 
-                src={product.image} 
-                alt={product.name} 
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            />
-            <div className="absolute top-4 left-4">
-                <Badge type={product.badge}>{product.badge}</Badge>
-            </div>
-            <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/60 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                <p className="text-white text-xs font-medium flex items-center gap-1">
-                    <Info size={12} /> Stock limitado
-                </p>
-            </div>
-        </div>
-        
-        <div className="p-6 flex flex-col flex-grow">
-            <div className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2">{product.category}</div>
-            <h3 className="text-lg font-bold text-slate-900 mb-2 leading-tight group-hover:text-blue-700 transition-colors">{product.name}</h3>
-            <p className="text-slate-500 text-sm mb-4 line-clamp-2 flex-grow">{product.description}</p>
-            
-            <div className="border-t border-slate-100 pt-4 mt-auto">
-                <div className="flex items-end justify-between mb-4">
-                    <div>
-                        <span className="block text-slate-400 text-xs line-through mb-0.5">USD {product.originalPrice.toLocaleString()}</span>
-                        <span className="block text-2xl font-bold text-slate-900">USD {product.price.toLocaleString()}</span>
-                    </div>
-                    <div className="text-right">
-                        <span className="text-green-600 text-xs font-bold bg-green-100 px-2 py-1 rounded">
-                            -{Math.round((1 - product.price/product.originalPrice) * 100)}% OFF
-                        </span>
-                    </div>
+const ProductCard = ({ product, addToCart }) => {
+    // Supabase returns snake_case names, so we need to handle both formats
+    const originalPrice = product.original_price || product.originalPrice || 0;
+    const price = product.price || 0;
+    const discount = originalPrice > 0 ? Math.round((1 - price / originalPrice) * 100) : 0;
+
+    return (
+        <div className="group bg-white rounded-xl overflow-hidden border border-slate-200 hover:border-amber-400/50 hover:shadow-xl transition-all duration-300 flex flex-col h-full">
+            <div className="relative h-64 overflow-hidden bg-slate-100">
+                <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute top-4 left-4">
+                    <Badge type={product.badge}>{product.badge}</Badge>
                 </div>
-                <button 
-                    onClick={() => addToCart(product)}
-                    className="w-full bg-slate-900 hover:bg-blue-700 text-white font-medium py-3 rounded flex items-center justify-center gap-2 transition-all"
-                >
-                    <ShoppingCart size={18} /> Agregar al Pedido
-                </button>
+                <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/60 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <p className="text-white text-xs font-medium flex items-center gap-1">
+                        <Info size={12} /> Stock limitado
+                    </p>
+                </div>
+            </div>
+
+            <div className="p-6 flex flex-col flex-grow">
+                <div className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2">{product.category}</div>
+                <h3 className="text-lg font-bold text-slate-900 mb-2 leading-tight group-hover:text-blue-700 transition-colors">{product.name}</h3>
+                <p className="text-slate-500 text-sm mb-4 line-clamp-2 flex-grow">{product.description}</p>
+
+                <div className="border-t border-slate-100 pt-4 mt-auto">
+                    <div className="flex items-end justify-between mb-4">
+                        <div>
+                            {originalPrice > 0 && (
+                                <span className="block text-slate-400 text-xs line-through mb-0.5">USD {originalPrice.toLocaleString()}</span>
+                            )}
+                            <span className="block text-2xl font-bold text-slate-900">USD {price.toLocaleString()}</span>
+                        </div>
+                        {discount > 0 && (
+                            <div className="text-right">
+                                <span className="text-green-600 text-xs font-bold bg-green-100 px-2 py-1 rounded">
+                                    -{discount}% OFF
+                                </span>
+                            </div>
+                        )}
+                    </div>
+                    <button
+                        onClick={() => addToCart(product)}
+                        className="w-full bg-slate-900 hover:bg-blue-700 text-white font-medium py-3 rounded flex items-center justify-center gap-2 transition-all"
+                    >
+                        <ShoppingCart size={18} /> Agregar al Pedido
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
-);
+    );
+};
 
 const CartDrawer = ({ isOpen, onClose, cart, removeFromCart }) => {
     const total = cart.reduce((sum, item) => sum + item.price, 0);
 
+
+    const handleWhatsappCheckout = () => {
+        const phoneNumber = "51933495414"; // Número de WhatsApp
+        let message = "Hola, estoy interesado en los siguientes productos de Soluciones GM&SL:\n\n";
+
+        cart.forEach(item => {
+            message += `- ${item.name} (USD ${item.price.toLocaleString()})\n`;
+        });
+
+        message += `\n*Total: USD ${total.toLocaleString()}*`;
+        message += "\n\nQuedo atento a su respuesta para coordinar la compra.";
+
+        const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+        window.open(url, '_blank');
+    };
+
     return (
         <div className={`fixed inset-0 z-[60] flex justify-end transition-opacity duration-300 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose}></div>
-            
+
             <div className={`relative w-full max-w-md bg-white h-full shadow-2xl transform transition-transform duration-300 flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
                 <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                     <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
@@ -269,8 +236,13 @@ const CartDrawer = ({ isOpen, onClose, cart, removeFromCart }) => {
                     <p className="text-xs text-slate-500 mb-6 text-center">
                         * Precios no incluyen IGV/IVA ni costos de envío para maquinaria pesada.
                     </p>
-                    <button className="w-full bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold py-4 rounded transition-colors">
-                        Procesar Cotización
+                    <button
+                        onClick={handleWhatsappCheckout}
+                        disabled={cart.length === 0}
+                        className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2"
+                    >
+                        <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.592 2.654-.696c1.029.575 2.035.892 3.167.892 3.18 0 5.767-2.587 5.767-5.768.001-3.185-2.585-5.77-5.768-5.77zM12 2C6.48 2 2 6.48 2 12c0 1.93.55 3.72 1.5 5.25L.5 23l5.8-1.42C8.18 22.5 10.02 23 12 23c5.52 0 10-4.48 10-10S17.52 2 12 2zm.01 18c-1.92 0-3.7-.63-5.22-1.72l-.38-.26-2.91.76.78-2.84-.23-.4C2.5 13.9 1.9 12.1 1.9 10.2c0-5.58 4.54-9.8 9.8-9.8 2.62 0 5.08 1.02 6.94 2.87 1.86 1.85 2.88 4.31 2.88 6.93 0 5.4-4.4 9.8-9.8 9.8z" /></svg>
+                        Cotizar por WhatsApp
                     </button>
                 </div>
             </div>
@@ -279,7 +251,7 @@ const CartDrawer = ({ isOpen, onClose, cart, removeFromCart }) => {
 };
 
 const FeatureStrip = () => (
-    <div className="bg-white border-b border-slate-200 py-8">
+    <div id="nosotros" className="bg-white border-b border-slate-200 py-8 scroll-mt-24">
         <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="flex items-center gap-4">
                 <div className="p-3 bg-blue-50 text-blue-600 rounded-full">
@@ -313,13 +285,30 @@ const FeatureStrip = () => (
 );
 
 function App() {
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [activeCategory, setActiveCategory] = useState("Todos");
     const [cart, setCart] = useState([]);
     const [isCartOpen, setIsCartOpen] = useState(false);
 
-    const filteredProducts = activeCategory === "Todos" 
-        ? productsData 
-        : productsData.filter(p => p.category === activeCategory);
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const data = await getProducts();
+                setProducts(data);
+                setLoading(false);
+            } catch (error) {
+                console.error("Error cargando productos", error);
+                setLoading(false);
+            }
+        };
+
+        fetchProducts();
+    }, []);
+
+    const filteredProducts = activeCategory === "Todos"
+        ? products
+        : products.filter(p => p.category === activeCategory);
 
     const addToCart = (product) => {
         setCart([...cart, product]);
@@ -333,34 +322,33 @@ function App() {
     return (
         <div className="min-h-screen flex flex-col">
             <Navbar cartCount={cart.length} toggleCart={() => setIsCartOpen(true)} />
-            <CartDrawer 
-                isOpen={isCartOpen} 
-                onClose={() => setIsCartOpen(false)} 
+            <CartDrawer
+                isOpen={isCartOpen}
+                onClose={() => setIsCartOpen(false)}
                 cart={cart}
                 removeFromCart={removeFromCart}
             />
-            
+
             <Hero />
             <FeatureStrip />
 
-            <main className="flex-grow container mx-auto px-6 py-16">
+            <main id="catalogo" className="flex-grow container mx-auto px-6 py-16 scroll-mt-24">
                 <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
                     <div>
                         <h3 className="text-3xl font-bold text-slate-900 mb-2">Catálogo General</h3>
                         <p className="text-slate-500">Explore nuestro inventario actualizado en tiempo real.</p>
                     </div>
-                    
+
                     {/* Category Filter */}
-                    <div className="flex flex-wrap gap-2">
+                    <div id="categorias" className="flex flex-wrap gap-2 scroll-mt-24">
                         {categories.map(cat => (
                             <button
                                 key={cat}
                                 onClick={() => setActiveCategory(cat)}
-                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                                    activeCategory === cat 
-                                    ? 'bg-slate-900 text-white shadow-lg scale-105' 
+                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${activeCategory === cat
+                                    ? 'bg-slate-900 text-white shadow-lg scale-105'
                                     : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
-                                }`}
+                                    }`}
                             >
                                 {cat}
                             </button>
@@ -369,11 +357,18 @@ function App() {
                 </div>
 
                 {/* Products Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {filteredProducts.map(product => (
-                        <ProductCard key={product.id} product={product} addToCart={addToCart} />
-                    ))}
-                </div>
+                {loading ? (
+                    <div className="text-center py-20">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mx-auto mb-4"></div>
+                        <p className="text-slate-500 animate-pulse">Cargando inventario...</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {filteredProducts.map(product => (
+                            <ProductCard key={product.id} product={product} addToCart={addToCart} />
+                        ))}
+                    </div>
+                )}
 
                 {activeCategory !== "Todos" && filteredProducts.length === 0 && (
                     <div className="text-center py-20">
@@ -383,7 +378,7 @@ function App() {
             </main>
 
             {/* Footer */}
-            <footer className="bg-slate-900 text-slate-400 py-16 border-t border-slate-800">
+            <footer id="contacto" className="bg-slate-900 text-slate-400 py-16 border-t border-slate-800 scroll-mt-24">
                 <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12">
                     <div>
                         <h4 className="text-white font-bold text-lg mb-6">SOLUCIONES <span className="text-amber-500">GM&SL</span></h4>
@@ -396,7 +391,7 @@ function App() {
                             <div className="w-8 h-8 bg-slate-800 rounded hover:bg-amber-500 transition-colors cursor-pointer"></div>
                         </div>
                     </div>
-                    
+
                     <div>
                         <h4 className="text-white font-bold mb-6">Categorías</h4>
                         <ul className="space-y-3 text-sm">
@@ -427,7 +422,7 @@ function App() {
                     </div>
                 </div>
                 <div className="container mx-auto px-6 mt-16 pt-8 border-t border-slate-800 text-center text-xs">
-                    &copy; 2024 Soluciones GM&SL. Todos los derechos reservados.
+                    &copy; 2026 Soluciones GM&SL. Todos los derechos reservados.
                 </div>
             </footer>
         </div>
